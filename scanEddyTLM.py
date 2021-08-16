@@ -3,8 +3,10 @@ from datetime import timedelta, datetime
 from typing import NamedTuple
 import os.path
 
+from colorama import Fore, Style
+
 fileName = 'tlm.csv'
-fileWritePeriod = 3600 #seconds
+fileWritePeriod = 36 #seconds
 
 class DeviceAttr(NamedTuple):
     addr:str
@@ -46,12 +48,13 @@ class ScanDelegate(DefaultDelegate):
 
       eddyDevices.update({dev.addr : DeviceAttr(dev.addr, dev.rssi, bat, sec, cnt, tmp)})
       print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | '\
-      f'{dev.addr} | bat {bat}mV | tmp {tmp:3.1f}°C')
+      f'{dev.addr} | bat {Fore.GREEN}{bat}mV{Style.RESET_ALL} | tmp {Fore.YELLOW}{tmp:3.1f}°C{Style.RESET_ALL} | rssi {Fore.MAGENTA}{dev.rssi}dB{Style.RESET_ALL} | time {Fore.CYAN}{str(timedelta(seconds=sec))}{Style.RESET_ALL} ')
 
 print("Scan... (Press Ctrl+C to terminate)")
 
-try:
-  while True:
+bExit = False
+while bExit == False:
+  try:
     scanner = Scanner().withDelegate(ScanDelegate())    
     devices = scanner.scan(1) #10 s by default   
     
@@ -72,5 +75,5 @@ try:
         startTime = currentTime
         eddyDevices.clear()
     
-except KeyboardInterrupt:
-  pass
+  except KeyboardInterrupt:
+    bExit = True
